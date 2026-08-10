@@ -133,10 +133,23 @@ if (bookingCount > 0) {
     <div className="page">
       <div className="ph">
         <div><div className="ph-title">Customers</div></div>
-        <button className="btn btn-p" onClick={onAddCust}>👤 Add Customer</button>
+       <div
+  style={{
+    display: 'flex',
+    width: '100%',
+    justifyContent: 'flex-end'
+  }}
+>
+  <button
+    className="btn btn-p"
+    onClick={onAddCust}
+  >
+    👤 Add Customer
+  </button>
+</div>
       </div>
       <div className="fbar">
-        <div style={{display:'flex',alignItems:'center',gap:'8px',background:'var(--bg)',border:'1.5px solid var(--bdr)',borderRadius:'var(--r)',padding:'8px 14px',width:'280px'}}>
+        <div style={{display:'flex',alignItems:'center',gap:'8px',background:'var(--bg)',border:'1.5px solid var(--bdr)',borderRadius:'var(--r)',padding:'8px 14px',width:'100%',maxWidth:'380px',flex:1,minWidth:0,boxSizing:'border-box'}}>
           <span style={{color:'var(--tx3)'}}>🔍</span>
           <input type="text" placeholder="Search name or phone..." value={search} onChange={e => setSearch(e.target.value)}
             style={{border:'none',background:'none',outline:'none',fontSize:'14px',color:'var(--tx)',width:'100%',fontFamily:"'Outfit',sans-serif"}}/>
@@ -194,17 +207,43 @@ if (bookingCount > 0) {
       Last Visit
     </div>
   </div>
-            <div className="cs" style={{flex:0,display:'flex',gap:'4px',alignItems:'center'}}>
-              <button className="ab wa" onClick={() => waCust(c.id)} title="WhatsApp">💬</button>
+            <div
+  style={{
+    width: "100%",
+    display: "flex",
+    justifyContent: "flex-end",
+    gap: "8px",
+    marginTop: "15px",
+    paddingTop: "12px",
+    borderTop: "1px solid var(--bdr)"
+  }}
+>
+  <button
+    className="ab wa"
+    onClick={(e) => {
+      e.stopPropagation();
+      waCust(c.id);
+    }}
+  >
+    💬
+  </button>
 
-            <button className="ab edit" onClick={() => onEditCust(c.id)} title="Edit">
+  <button
+    className="ab edit"
+    onClick={(e) => {
+      e.stopPropagation();
+      onEditCust(c.id);
+    }}
+  >
     ✏️
-          </button>
+  </button>
 
   <button
     className="ab del"
-    onClick={() => delCust(c.id)}
-    title="Delete"
+    onClick={(e) => {
+      e.stopPropagation();
+      delCust(c.id);
+    }}
   >
     🗑️
   </button>

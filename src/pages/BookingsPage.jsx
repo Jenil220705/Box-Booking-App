@@ -3,6 +3,7 @@ import { useApp } from '../context/AppContext'
 import { t12, fmtD, bc, calcH } from '../utils/helpers'
 import { TODAY } from '../utils/helpers'
 import { supabase } from '../supabase'
+import BookingCard from "../components/BookingCard";
 
 export default function BookingsPage({ onNewBooking, onRecurring }) {
   const {
@@ -10,10 +11,12 @@ export default function BookingsPage({ onNewBooking, onRecurring }) {
   setBookings,
   customers,
   setCustomers,
+  boxes,
   showToast
 } = useApp()
   const [filter, setFilter] = useState('all')
   const [dateFilter, setDateFilter] = useState('')
+ 
 
   const delB = async (id) => {
 
@@ -98,35 +101,93 @@ console.log("TOTAL BOOKINGS =", bookings)
     console.log("FILTERED LIST =", list)
   if (dateFilter) list = list.filter(b => b.date === dateFilter)
   list.sort((a,b) => b.date.localeCompare(a.date) || a.from.localeCompare(b.from))
+const activeBoxes = boxes.filter(box => box.active)
+const showBoxColumn = activeBoxes.length > 1
 
   return (
     <div className="page">
-      <div className="ph">
+      <div
+  className="ph"
+  style={{
+    gap:"12px",
+    alignItems:"flex-start"
+  }}
+>
         <div><div className="ph-title">All Bookings</div></div>
-        <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
+        <div
+  style={{
+    display:'flex',
+    gap:'8px',
+    flexWrap:'wrap',
+    width:'100%'
+  }}
+>
           <button className="btn btn-s btn-sm" onClick={onRecurring}>🔁 Recurring</button>
           <button className="btn btn-p" onClick={() => onNewBooking()}>➕ New Booking</button>
         </div>
       </div>
-      <div className="fbar">
-        {['all','confirmed','completed','cancelled'].map(s => (
+      <div
+  className="fbar"
+  style={{
+    gap:'10px',
+    alignItems:'center'
+  }}
+>
+        {['all','confirmed'].map(s => (
           <button key={s} className={`chip${filter===s?' active':''}`} onClick={() => setFilter(s)}>
             {s.charAt(0).toUpperCase()+s.slice(1)}
           </button>
         ))}
-        <input type="date" className="fi" style={{marginLeft:'auto',width:'auto',padding:'6px 12px',fontSize:'13px',borderRadius:'99px'}}
+        <input type="date" className="fi"style={{
+marginLeft:'auto',
+width:'100%',
+maxWidth:'180px',
+padding:'6px 12px',
+fontSize:'13px',
+borderRadius:'99px',
+minWidth:0
+}}
           value={dateFilter} onChange={e => setDateFilter(e.target.value)}/>
       </div>
-      <div className="tw">
+      <div style={{display:'flex',flexDirection:'column',gap:'16px'}}>
+
+{list.length ? list.map((b,i)=>(
+
+<BookingCard
+key={b.id}
+booking={b}
+index={i}
+onEdit={() => onNewBooking(b.id)}
+onWhatsApp={() => waQ(b.id)}
+onDelete={() => delB(b.id)}
+/>
+
+)) : (
+
+<div className="card" style={{textAlign:'center'}}>
+No bookings found
+</div>
+
+)}
+
+</div>
+
+      <div className="tw desktop-booking-table">
+       
+
+
+
         <table>
+          
           <thead>
 <tr>
 <th>#</th>
 <th>Customer</th>
+<th>Amount</th>
 <th>Date</th>
 <th>Time</th>
 <th>Hrs</th>
-<th>Amount</th>
+{showBoxColumn && <th>Box</th>}
 <th>Status</th>
 <th>Actions</th>
 </tr>
@@ -135,20 +196,51 @@ console.log("TOTAL BOOKINGS =", bookings)
             {list.length ? list.map((b,i) => (
               <tr key={b.id}>
                 <td style={{color:'var(--tx3)',fontSize:'12px'}}>{i+1}</td>
-                <td><div style={{fontWeight:700}}>{b.name}</div><div style={{fontSize:'12px',color:'var(--tx3)'}}>📱 {b.phone}</div></td>
-                <td style={{fontWeight:600}}>{fmtD(b.date)}</td>
-                <td style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700}}>{t12(b.from)}–{t12(b.to)}</td>
-                <td>{calcH(b.from,b.to)}h</td>
-                <td style={{fontWeight:700}}>
+                <td
+  style={{
+    minWidth:'160px'
+  }}
+><div style={{fontWeight:700}}>{b.name}</div><div style={{fontSize:'12px',color:'var(--tx3)'}}>📱 {b.phone}</div></td>
+              <td
+style={{
+fontWeight:700,
+whiteSpace:'nowrap'
+}}
+>
   ₹{(b.amount||0).toLocaleString('en-IN')}
 </td>
+                <td style={{fontWeight:600}}>{fmtD(b.date)}</td>
+                <td
+style={{
+fontFamily:"'Space Grotesk',sans-serif",
+fontWeight:700,
+whiteSpace:'nowrap'
+}}
+>{t12(b.from)}–{t12(b.to)}</td>
 <td>
+  {calcH(b.from, b.to)}h
+</td>
+                
+
+{showBoxColumn && (
+  <td>
+    {boxes.find(box => box.id === b.box_id)?.name}
+  </td>
+)}
+
+<td>
+
   <span className={`badge ${bc(b.status)}`}>
     {b.status}
   </span>
 </td>
                 <td>
-                  <div className="acts">
+                  <div
+className="acts"
+style={{
+flexWrap:'nowrap'
+}}
+>
                     <button className="ab edit" onClick={() => onNewBooking(b.id)} title="Edit">✏️</button>
                     <button className="ab wa" onClick={() => waQ(b.id)} title="WhatsApp">💬</button>
                     <button className="ab del" onClick={() => delB(b.id)} title="Delete">🗑️</button>
@@ -156,10 +248,11 @@ console.log("TOTAL BOOKINGS =", bookings)
                 </td>
               </tr>
             )) : (
-              <tr><td colSpan="8" style={{textAlign:'center',padding:'28px',color:'var(--tx3)'}}>No bookings found</td></tr>
+              <tr><td colSpan={showBoxColumn ? 9 : 8} style={{textAlign:'center',padding:'28px',color:'var(--tx3)'}}>No bookings found</td></tr>
             )}
           </tbody>
         </table>
+       
       </div>
     </div>
   )

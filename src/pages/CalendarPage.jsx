@@ -119,12 +119,32 @@ const groupedBookings =
 console.log("BOXES =>", boxes)
   return (
     <div className="page">
-      <div className="ph">
-        <div><div className="ph-title">📅 Calendar</div></div>
-        <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
-          <button className="btn btn-s btn-sm" onClick={onRecurring}>🔁 Recurring</button>
-          <button className="btn btn-p" onClick={() => onNewBooking()}>➕ New Booking</button>
-        </div>
+      <div
+  className="ph"
+  style={{
+    flexDirection: "column",
+    alignItems: "stretch"
+  }}
+>
+  <div>
+    <div className="ph-title">📅 Calendar</div>
+  </div>
+
+  <div style={{display:'flex',gap:'8px',flexWrap:'wrap'}}>
+  <button
+    className="btn btn-s btn-sm"
+    onClick={onRecurring}
+  >
+    🔁 Recurring
+  </button>
+
+  <button
+    className="btn btn-p"
+    onClick={() => onNewBooking()}
+  >
+    ➕ New Booking
+  </button>
+</div>
       </div>
       <div className="card">
         <div className="cal-tb">

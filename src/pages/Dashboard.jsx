@@ -196,26 +196,36 @@ const monthProfit =
   </div>
 </motion.div>
 
-      <div className="qa-grid">
-        <div
-  className="qa-card primary"
-  onClick={() => onNewBooking()}
->
-          <span className="qa-icon">➕</span>
-          <div className="qa-label">New Booking</div>
-          <div className="qa-sub">Add single booking</div>
-        </div>
-        <div className="qa-card" onClick={onRecurring}>
-          <span className="qa-icon">🔁</span>
-          <div className="qa-label">Recurring Booking</div>
-          <div className="qa-sub">Weekly / daily repeat</div>
-        </div>
-        <div className="qa-card" onClick={() => go('calendar')}>
-          <span className="qa-icon">📅</span>
-          <div className="qa-label">Calendar View</div>
-          <div className="qa-sub">Month overview</div>
-        </div>
-      </div>
+     <div className="qa-grid">
+
+  <div
+    className="qa-card"
+    onClick={() => go('calendar')}
+  >
+    <span className="qa-icon">📅</span>
+    <div className="qa-label">Calendar View</div>
+    <div className="qa-sub">Month overview</div>
+  </div>
+
+  <div
+    className="qa-card primary"
+    onClick={() => onNewBooking()}
+  >
+    <span className="qa-icon">➕</span>
+    <div className="qa-label">New Booking</div>
+    <div className="qa-sub">Add single booking</div>
+  </div>
+
+  <div
+    className="qa-card"
+    onClick={onRecurring}
+  >
+    <span className="qa-icon">🔁</span>
+    <div className="qa-label">Recurring Booking</div>
+    <div className="qa-sub">Weekly / daily repeat</div>
+  </div>
+
+</div>
 
       <div className="sg">
         <div className="stat"><div className="sh2"><div className="si si-b">📅</div></div><div className="sv">

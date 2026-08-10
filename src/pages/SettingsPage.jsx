@@ -13,7 +13,6 @@ export default function SettingsPage() {
   const [ph, setPh] = useState('+91 98765 43210')
   const [opens, setOpens] = useState('06:00')
   const [closes, setCloses] = useState('23:59')
-  const [price, setPrice] = useState(cfg.price || 1500)
   const [newPassword, setNewPassword] = useState('')
   const [waMsg, setWaMsg] = useState('') 
   const [smsMsg, setSmsMsg] = useState('')
@@ -23,7 +22,7 @@ export default function SettingsPage() {
   const [recurWaMsg, setRecurWaMsg] = useState('')
 
   useEffect(() => {
-  setPrice(cfg.price || 1500)
+ 
 
   setWaMsg(
     localStorage.getItem("hz_wa_tmpl") || DEFAULT_WA
@@ -184,12 +183,7 @@ if (boxCount < currentCount) {
 
 }
 
-  const saveSettings = () => {
-    const newCfg = {...cfg, price: parseFloat(price)||1500}
-    setCfg(newCfg)
-    localStorage.setItem('hz_s', JSON.stringify(newCfg))
-    showToast('Settings saved 💾', 's')
-  }
+  
   
 
   const saveWA = () => {
@@ -255,20 +249,7 @@ const updatePassword = async () => {
             <div className="fg"><label className="flbl">Opens</label><input className="fi" type="time" value={opens} onChange={e=>setOpens(e.target.value)}/></div>
             <div className="fg"><label className="flbl">Closes</label><input className="fi" type="time" value={closes} onChange={e=>setCloses(e.target.value)}/></div>
           </div>
-          <div className="fg">
-
-  <label className="flbl">
-    Price / Hour (₹)
-  </label>
-
-  <input
-    className="fi"
-    type="number"
-    value={price}
-    onChange={e => setPrice(e.target.value)}
-  />
-
-</div>
+         
 
 <div className="fg">
 
@@ -289,14 +270,20 @@ const updatePassword = async () => {
   />
 
 </div>
-          <button className="btn btn-p btn-sm" onClick={saveSettings}>💾 Save</button>
-          <button
-  className="btn btn-s btn-sm"
-  style={{marginLeft:'10px'}}
-  onClick={saveBoxCount}
+          <div
+  className="fa"
+  style={{
+    justifyContent: 'flex-start',
+    marginTop: '10px'
+  }}
 >
-🏏 Update Boxes
-</button>
+  <button
+    className="btn btn-s btn-sm"
+    onClick={saveBoxCount}
+  >
+    🏏 Update Boxes
+  </button>
+</div>
         </div>
         {/* Preferences */}
         <div className="set-s">
@@ -422,20 +409,20 @@ const updatePassword = async () => {
   onChange={e => setNewPassword(e.target.value)}
   placeholder="New Password"
 /></div>
-          <button
+          <div className="fa" style={{justifyContent:'flex-start',marginTop:'10px'}}>
+            <button
   className="btn btn-p btn-sm"
-  style={{marginTop:'10px'}}
   onClick={updatePassword}
 >
   🔐 Update Password
 </button>
-          <button
+            <button
   className="btn btn-s btn-sm"
-  style={{marginTop:'10px', marginLeft:'10px'}}
   onClick={logout}
 >
   🚪 Logout
 </button>
+          </div>
         </div>
       </div>
     </div>

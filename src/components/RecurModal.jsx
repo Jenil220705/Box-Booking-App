@@ -34,8 +34,11 @@ export default function RecurModal({
   const [rFrom, setRFrom] = useState('19:00')
   const [rTo, setRTo] = useState('21:00')
   const [rWeeks, setRWeeks] = useState(4)
+  const [rRate, setRRate] = useState('')
  const [rBoxId, setRBoxId] = useState('')
   const [selDays, setSelDays] = useState([1]) // Mon default
+  const activeBoxes = boxes.filter(box => box.active)
+const showBoxField = activeBoxes.length > 1
 
 
 useEffect(() => {
@@ -52,6 +55,7 @@ useEffect(() => {
     setRFrom("19:00")
     setRTo("21:00")
     setRWeeks(4)
+    setRRate('')
     setSelDays([1])
 
     if (boxes?.length) {
@@ -70,6 +74,10 @@ useEffect(() => {
   editData.to || "21:00"
 )
   setRWeeks(editData.weeks || 4)
+  setRRate(
+  editData.rate_per_hour || ""
+)
+  setRRate(editData.rate || '')
 
   setSelDays(
     (editData.days || []).map(
@@ -171,7 +179,8 @@ const saveRecur = async () => {
         days: selDays,
         start_time: rFrom,
         end_time: rTo,
-        weeks: parseInt(rWeeks)
+        weeks: parseInt(rWeeks),
+        rate_per_hour: parseFloat(rRate) || 0,
       })
       .eq("id", gid)
 
@@ -247,9 +256,12 @@ console.log("CHECK BOX =", rBoxId)
       start_time: rFrom,
       end_time: rTo,
       status: "confirmed",
-      amount:
-        calcH(rFrom, rTo) *
-        (cfg.price || 800),
+     amount:
+  calcH(rFrom, rTo) *
+  (parseFloat(rRate) || 0),
+
+rate_per_hour:
+  parseFloat(rRate) || 0,
       box_id: rBoxId,
       recurring_group_id: gid
 
@@ -338,7 +350,7 @@ window.open(
 }
 
   
-    if (!rName || !rDate || !rFrom || !rTo || !rBoxId) { showToast('Fill required fields', 'e'); return }
+    if (!rName || !rDate || !rFrom || !rTo || !rBoxId || !rRate) {showToast('Fill required fields', 'e'); return }
     if (!selDays.length) { showToast('Select at least one day', 'e'); return }
     const weeks = parseInt(rWeeks) || 4
     const { data: groupData, error: groupError } = await supabase
@@ -350,7 +362,8 @@ window.open(
     days: selDays,
     start_time: rFrom,
     end_time: rTo,
-    weeks: weeks
+    weeks: weeks,
+rate_per_hour: parseFloat(rRate) || 0,
   })
   .select()
   .single()
@@ -406,9 +419,12 @@ for (let w = 0; w < weeks; w++) {
 
       status: "confirmed",
 
-      amount:
-        calcH(rFrom, rTo) *
-        (cfg.price || 800),
+     amount:
+  calcH(rFrom, rTo) *
+  (parseFloat(rRate) || 0),
+
+rate_per_hour:
+  parseFloat(rRate) || 0,
 
       box_id: rBoxId,
 
@@ -433,7 +449,8 @@ for (let w = 0; w < weeks; w++) {
       days: selDays.map(d => DAY_NAMES[d]),
       from: rFrom, to: rTo,
       weeks, created,
-      createdOn: new Date().toLocaleDateString('en-IN')
+      createdOn: new Date().toLocaleDateString('en-IN'),
+      rate_per_hour: parseFloat(rRate) || 0
     }
     console.log(
   "INSERT DATA =>",
@@ -592,44 +609,67 @@ if (existingCustomer) {
           <span className="mt">🔁 Recurring Booking</span>
           <button className="mc" onClick={onClose}>✕</button>
         </div>
+       
         <div className="fg">
+  <label className="flbl">Mobile Number *</label>
+
+  <input
+    className="fi"
+    type="tel"
+    value={rPhone}
+    onChange={e =>
+      setRPhone(
+        e.target.value
+          .replace(/\D/g, "")
+          .slice(0,10)
+      )
+    }
+    maxLength={10}
+    inputMode="numeric"
+    placeholder="9876543210"
+  />
+</div>
+         <div className="fg">
           <label className="flbl">Customer Name *</label>
           <input className="fi" value={rName} onChange={e => setRName(e.target.value)} placeholder="e.g. Rahul Shah"/>
         </div>
         <div className="fg">
-          <label className="flbl">Mobile Number</label>
-          <input className="fi" type="tel" value={rPhone} onChange={e => setRPhone(e.target.value)} placeholder="+91 98765 43210"/>
-        </div>
+  <label className="flbl">Amount / Hour (₹) *</label>
+  <input
+    className="fi"
+    type="number"
+    value={rRate}
+    onChange={e => setRRate(e.target.value)}
+    placeholder="Enter hourly rate"
+    min="1"
+  />
+</div>
         <div className="fg">
           <label className="flbl">Start Date *</label>
           <input className="fi" type="date" value={rDate} onChange={e => setRDate(e.target.value)}/>
         </div>
-        <div className="fg">
-  <label className="flbl">Ground / Box *</label>
+        {showBoxField && (
+  <div className="fg">
 
-  <select
-  className="fi"
-  value={rBoxId}
-  onChange={e =>
-    setRBoxId(e.target.value)
-  }
->
+    <label className="flbl">Ground / Box *</label>
 
-  {boxes
-    .filter(box => box.active)
-    .map(box => (
+    <select
+      className="fi"
+      value={rBoxId}
+      onChange={e => setRBoxId(e.target.value)}
+    >
+      {activeBoxes.map(box => (
+        <option
+          key={box.id}
+          value={box.id}
+        >
+          {box.name}
+        </option>
+      ))}
+    </select>
 
-      <option
-        key={box.id}
-        value={box.id}
-      >
-        {box.name}
-      </option>
-
-    ))}
-
-</select>
-</div>
+  </div>
+)}
         <div className="fg">
           <label className="flbl">Time Slot *</label>
           <div className="tbar">
@@ -661,11 +701,11 @@ if (existingCustomer) {
           <label className="flbl">Number of Weeks *</label>
           <input className="fi" type="number" value={rWeeks} onChange={e => setRWeeks(e.target.value)} min="1" max="52"/>
         </div>
+        
         <div style={{background:'var(--bl)',borderRadius:'var(--r)',padding:'12px 14px',fontSize:'13px',color:'var(--bd)',marginBottom:'4px',lineHeight:'1.6'}}>
           ℹ️ <strong>{preview()}</strong>
         </div>
         <div className="fa">
-          <button className="btn btn-s" onClick={onClose}>Cancel</button>
         
           <button className="btn btn-p" onClick={saveRecur}>{
 

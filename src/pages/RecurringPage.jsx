@@ -2,6 +2,7 @@ import React from 'react'
 import { supabase } from '../supabase'
 import { useApp } from '../context/AppContext'
 import { t12 } from '../utils/helpers'
+import RecurringCard from "../components/RecurringCard";
 
 export default function RecurringPage({
 
@@ -12,7 +13,8 @@ export default function RecurringPage({
   recurGroups,
   setRecurGroups,
   showToast,
-  loadCustomers
+  loadCustomers,
+  boxes
 } = useApp()
 
   const delRecur = async (group) => {
@@ -70,7 +72,11 @@ showToast(
 
 }
 
+const activeBoxes = boxes.filter(box => box.active)
+const showBoxColumn = activeBoxes.length > 1
+
   return (
+    
     <div className="page">
       <div className="ph">
         <div>
@@ -96,10 +102,22 @@ showToast(
         </div>
       </div>
 
-      <div className="tw">
+      <div className="desktop-booking-table">
+<div className="tw">
         <table>
           <thead>
-            <tr><th>Customer</th><th>Ground</th><th>Days</th><th>Time</th><th>Weeks</th><th>Bookings Created</th><th>Created On</th><th>Actions</th></tr>
+            <tr>
+<th>Customer</th>
+<th>Days</th>
+<th>Time</th>
+<th>Weeks</th>
+<th>Bookings</th>
+
+{showBoxColumn && <th>Box</th>}
+
+<th>Created</th>
+<th>Actions</th>
+</tr>
           </thead>
           <tbody>
             {recurGroups.length ? recurGroups.map((r, i) => (
@@ -108,11 +126,14 @@ showToast(
                   <div style={{fontWeight:700}}>{r.name}</div>
                   <div style={{fontSize:'12px',color:'var(--tx3)'}}>📱 {r.phone||'—'}</div>
                 </td>
-                <td>{r.box || '-'}</td>
+                
                 <td><span style={{background:'var(--bl)',color:'var(--blue)',padding:'3px 10px',borderRadius:'99px',fontSize:'12px',fontWeight:700}}>{r.days.join(', ')}</span></td>
                 <td style={{fontFamily:"'Space Grotesk',sans-serif",fontWeight:700}}>{t12(r.from)}–{t12(r.to)}</td>
                 <td style={{fontWeight:600}}>{r.weeks} weeks</td>
                 <td><span style={{background:'#dcfce7',color:'#16a34a',padding:'3px 10px',borderRadius:'99px',fontSize:'12px',fontWeight:700}}>{r.created} bookings</span></td>
+                {showBoxColumn && (
+  <td>{r.box || '-'}</td>
+)}
                 <td style={{fontSize:'13px',color:'var(--tx2)'}}>{r.createdOn||'—'}</td>
                 <td>
 
@@ -166,11 +187,43 @@ showToast(
 </td>
               </tr>
             )) : (
-              <tr><td colSpan="7" style={{textAlign:'center',padding:'30px',color:'var(--tx3)'}}>No recurring bookings yet. Click "Create Recurring" to start.</td></tr>
+              <tr><td colSpan={showBoxColumn ? 8 : 7} style={{textAlign:'center',padding:'30px',color:'var(--tx3)'}}>No recurring bookings yet. Click "Create Recurring" to start.</td></tr>
             )}
           </tbody>
         </table>
       </div>
+      </div>
+
+<div className="booking-mobile-list">
+
+  {recurGroups.length ? (
+
+    recurGroups.map(r => (
+
+      <RecurringCard
+        key={r.gid}
+        recurring={r}
+        onEdit={onRecurring}
+        onDelete={delRecur}
+      />
+
+    ))
+
+  ) : (
+
+    <div
+      style={{
+        textAlign:"center",
+        padding:"40px",
+        color:"var(--tx3)"
+      }}
+    >
+      No recurring bookings yet.
+    </div>
+
+  )}
+
+</div>
     </div>
   )
 }

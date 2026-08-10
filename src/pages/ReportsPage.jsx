@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import { useApp } from '../context/AppContext'
 import { TODAY, t12, fmtD, bc, ini, clr } from '../utils/helpers'
+import ReportCard from '../components/ReportCard'
 
 export default function ReportsPage() {
   const { bookings, showToast } = useApp()
@@ -68,47 +69,82 @@ export default function ReportsPage() {
             ))}
           </div>
         </div>
-        <div className="card">
-          <div className="ch"><span className="ct">🏆 Top Customers</span></div>
-          <TopCustomers />
-        </div>
       </div>
       <div className="card" style={{marginTop:'14px'}}>
         <div className="ch"><span className="ct">Booking List</span></div>
-        <div className="tw">
-          <table>
-            <thead><tr><th>Name</th><th>Date</th><th>Time</th><th>Status</th><th>Amount</th></tr></thead>
-            <tbody>
-              {active.slice(0,20).map(b => (
-                <tr key={b.id}>
-                  <td><div style={{fontWeight:700}}>{b.name}</div><div style={{fontSize:'11px',color:'var(--tx3)'}}>{b.phone}</div></td>
-                  <td>{fmtD(b.date)}</td>
-                  <td>{t12(b.from)}–{t12(b.to)}</td>
-                  <td><span className={`badge ${bc(b.status)}`}>{b.status}</span></td>
-                  <td style={{fontWeight:700,color:'var(--blue)'}}>₹{(b.amount||0).toLocaleString('en-IN')}</td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {/* Desktop */}
+<div className="tw reports-table">
+  <table>
+    <thead>
+      <tr>
+        <th>Name</th>
+        <th>Date</th>
+        <th>Time</th>
+        <th>Status</th>
+        <th>Amount</th>
+      </tr>
+    </thead>
+
+    <tbody>
+      {active.slice(0,20).map(b => (
+        <tr key={b.id}>
+          <td>
+            <div style={{fontWeight:700}}>
+              {b.name}
+            </div>
+
+            <div
+              style={{
+                fontSize:'11px',
+                color:'var(--tx3)'
+              }}
+            >
+              {b.phone}
+            </div>
+          </td>
+
+          <td>{fmtD(b.date)}</td>
+
+          <td>
+            {t12(b.from)} – {t12(b.to)}
+          </td>
+
+          <td>
+            <span className={`badge ${bc(b.status)}`}>
+              {b.status}
+            </span>
+          </td>
+
+          <td
+            style={{
+              fontWeight:700,
+              color:'var(--blue)'
+            }}
+          >
+            ₹{(b.amount||0).toLocaleString('en-IN')}
+          </td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>
+
+{/* Mobile */}
+
+<div className="reports-cards">
+
+  {active.slice(0,20).map(b => (
+
+    <ReportCard
+      key={b.id}
+      booking={b}
+    />
+
+  ))}
+
+</div>
       </div>
     </div>
   )
 }
 
-function TopCustomers() {
-  const { customers } = useApp()
-  const list = [...customers].sort((a,b) => b.cnt-a.cnt).slice(0,5)
-  return (
-    <div className="blist">
-      {list.map((c,i) => (
-        <div key={c.id} className="bi">
-          <div style={{width:'20px',height:'20px',borderRadius:'50%',background:'var(--blue)',color:'#fff',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'10px',fontWeight:700,flexShrink:0}}>{i+1}</div>
-          <div className="av" style={{background:clr(c.id)+'22',color:clr(c.id)}}>{ini(c.name)}</div>
-          <div className="bi-info"><div className="bi-name">{c.name}</div><div className="bi-sub">{c.phone}</div></div>
-          <div className="bi-r"><div className="bi-time" style={{color:'var(--blue)'}}>{c.cnt}</div><div className="bi-date">bookings</div></div>
-        </div>
-      ))}
-    </div>
-  )
-}

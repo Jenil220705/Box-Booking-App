@@ -317,7 +317,7 @@ return (
 <div
   style={{
     display:'grid',
-    gridTemplateColumns:'repeat(4,1fr)',
+    gridTemplateColumns:'repeat(auto-fit,minmax(130px,1fr))',
     gap:'10px',
     marginTop:'15px'
   }}
@@ -374,51 +374,33 @@ return (
 
   <h3>Filters</h3>
 
-  <div
-    style={{
-      display:'flex',
-      gap:'10px',
-      marginBottom:'10px'
-    }}
-  >
-
-    <button
-className="btn btn-sm"
-onClick={() => setDateFilter('all')}
+  <select
+  className="fi"
+  value={dateFilter}
+  onChange={e => setDateFilter(e.target.value)}
 >
-All
-</button>
 
-<button
-className="btn btn-sm"
-onClick={() => setDateFilter('today')}
->
-Today
-</button>
+  <option value="all">
+    All
+  </option>
 
+  <option value="today">
+    Today
+  </option>
 
-<button
-className="btn btn-sm"
-onClick={() => setDateFilter('week')}
->
-This Week
-</button>
+  <option value="week">
+    This Week
+  </option>
 
-<button
-className="btn btn-sm"
-onClick={() => setDateFilter('month')}
->
-This Month
-</button>
+  <option value="month">
+    This Month
+  </option>
 
-<button
-className="btn btn-sm"
-onClick={() => setDateFilter('custom')}
->
-Custom
-</button>
+  <option value="custom">
+    Custom Range
+  </option>
 
-  </div>
+</select>
 
   {dateFilter === 'custom' && (
 
@@ -426,7 +408,8 @@ Custom
   style={{
     display:'flex',
     gap:'10px',
-    marginTop:'10px'
+    marginTop:'10px',
+    flexWrap:'wrap'
   }}
 >
 
@@ -641,11 +624,13 @@ Custom
       borderBottom:'1px solid #ddd',
       display:'flex',
       justifyContent:'space-between',
-      alignItems:'center'
+      alignItems:'flex-start',
+      flexWrap:'wrap',
+      gap:'10px'
     }}
   >
 
-    <div>
+    <div style={{minWidth:0,flex:'1 1 180px',wordBreak:'break-word'}}>
 
       <b>{exp.title}</b>
 
@@ -668,10 +653,12 @@ Custom
       
     </div>
 
-    <div
+   <div
   style={{
     display:'flex',
-    gap:'8px'
+    gap:'8px',
+    flexShrink:0,
+    marginLeft:'auto'
   }}
 >
 

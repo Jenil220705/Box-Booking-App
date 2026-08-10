@@ -57,7 +57,6 @@ export function AppProvider({ children }) {
   const [recurGroups, setRecurGroups] = useState([])
   const [notifs, setNotifs] = useState(DEFAULT_NOTIFS)
   const [cfg, setCfg] = useState({
-  price:800,
   waTmpl:DEFAULT_WA_TEMPLATE,
   recurWaTmpl:DEFAULT_RECUR_WA_TEMPLATE,
   smsTmpl:DEFAULT_SMS_TEMPLATE

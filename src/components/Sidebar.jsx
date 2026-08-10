@@ -67,7 +67,12 @@ export default function Sidebar({ onLogout }) {
         <div className="sb-bot">
           <div className="sb-admin">
             <div className="av" style={{background:'var(--blue)',color:'#fff'}}>HA</div>
-            <div style={{flex:1}}>
+            <div
+  style={{
+    flex:1,
+    minWidth:0
+  }}
+>
               <div className="sb-aname">Hitzone Admin</div>
               <div className="sb-arole">Owner · Full Access</div>
             </div>

@@ -23,10 +23,25 @@ export default function Navbar() {
       <button
         className="menu-btn"
         onClick={() => setSidebarOpen(true)}
-        style={{display:'flex'}}
       >☰</button>
-      <div className="nav-title">{PAGE_TITLES[currentPage] || currentPage}</div>
-      <div className="nav-acts">
+      <div
+  className="nav-title"
+  style={{
+    minWidth: 0,
+    flex: 1,
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+    whiteSpace: 'nowrap'
+  }}
+>
+  {PAGE_TITLES[currentPage] || currentPage}
+</div>
+      <div
+  className="nav-acts"
+  style={{
+    flexShrink: 0
+  }}
+>
         <div className="date-badge">{dateStr}</div>
         <button className="ic-btn" onClick={() => setDark(d => !d)}>{dark ? '☀️' : '🌙'}</button>
         <button className="ic-btn" onClick={() => go('notifications')} style={{position:'relative'}}>

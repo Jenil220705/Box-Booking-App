@@ -15,6 +15,7 @@ export default function BookingModal({ open, onClose, editId, prefillDate, prefi
   const [from, setFrom] = useState('07:00')
   const [to, setTo] = useState('09:00')
   const [status, setStatus] = useState('confirmed')
+  const [rate, setRate] = useState(1500)
   const [conflict, setConflict] = useState(null)
 
   useEffect(() => {
@@ -24,10 +25,18 @@ export default function BookingModal({ open, onClose, editId, prefillDate, prefi
 
       const b = bookings.find(x => x.id === editId)
       if (b) {
-        setName(b.name); setPhone(b.phone); setDate(b.date)
-        setFrom(b.from); setTo(b.to); setStatus(b.status)
-        setBoxId(b.box_id || '')
-      }
+  setName(b.name)
+  setPhone(b.phone)
+  setDate(b.date)
+  setFrom(b.from)
+  setTo(b.to)
+  setStatus(b.status)
+  setBoxId(b.box_id || '')
+  setRate(
+    b.rate_per_hour ||
+    Math.round((b.amount || 0) / calcH(b.from, b.to))
+  )
+}
     } 
     else {
       const activeBoxes = boxes.filter(box => box.active)
@@ -36,7 +45,10 @@ if (activeBoxes.length > 0) {
   setBoxId(activeBoxes[0].id)
 }
 
-      setName(''); setPhone(''); setStatus('confirmed')
+      setName('')
+setPhone('')
+setStatus('confirmed')
+setRate(1500)
       setDate(prefillDate || TODAY)
       setFrom(prefillFrom || '07:00')
       // default +1hr
@@ -52,12 +64,26 @@ if (activeBoxes.length > 0) {
   }, [open, editId])
 
   const dur = calcH(from, to)
+  const activeBoxes = boxes.filter(box => box.active)
+const showBoxField = activeBoxes.length > 1
 
-  const nameAutofill = (val) => {
-    setName(val)
-    const match = customers.find(c => c.name.toLowerCase() === val.toLowerCase())
-    if (match) setPhone(match.phone)
+  const phoneAutofill = (val) => {
+
+  const onlyNumbers = val
+    .replace(/\D/g, "")
+    .slice(0, 10)
+
+  setPhone(onlyNumbers)
+
+  const match = customers.find(
+    c => c.phone === onlyNumbers
+  )
+
+  if (match) {
+    setName(match.name)
   }
+
+}
 
   const handleSave = async () => {
     const oldBooking = bookings.find(
@@ -74,6 +100,10 @@ if (activeBoxes.length > 0) {
   !to ||
   !boxId
 ) { showToast('Fill all required fields', 'e'); return }
+if (phone.length !== 10) {
+  showToast('Enter valid 10 digit mobile number', 'e')
+  return
+}
     if (from >= to) { showToast('End time must be after start time', 'e'); return }
     const { data: existing, error: checkError } = await supabase
   .from("bookings")
@@ -116,7 +146,7 @@ if (conflictB) {
     console.log("BEFORE INSERT")
     console.log("AMT TEST START")
 
-    const amt = calcH(from, to) * (cfg.price || 800)
+    const amt = calcH(from, to) * Number(rate || 0)
 
     console.log("AMT =", amt)
     console.log("EDIT ID =", editId)
@@ -136,7 +166,8 @@ console.log("VALUE =", editId)
  start_time: from,
  end_time: to,
  amount: amt,
- status: status,
+rate_per_hour: Number(rate),
+status: status,
 box_id: boxId
 })
   .eq('id', editId)
@@ -171,7 +202,9 @@ console.log("UPDATE ERROR:", error)
     to,
     status,
     amount: amt,
-    box_id: boxId
+rate_per_hour: Number(rate),
+status: status,
+box_id: boxId
   }
       : b
   )
@@ -222,8 +255,9 @@ console.log("UPDATE ERROR:", error)
  start_time: from,
  end_time: to,
  amount: amt,
+ rate_per_hour: Number(rate),
  status: status,
-box_id: boxId
+ box_id: boxId
 }
 ])
        .select()
@@ -251,6 +285,7 @@ if (error) {
  to,
  status,
 amount: amt,
+rate_per_hour: Number(rate),
 box_id: boxId
 }
 
@@ -384,41 +419,64 @@ console.log("NEW CUSTOMER ERROR:", newCustomerError)
           </div>
         )}
         <div className="fg">
-          <label className="flbl">Customer Name *</label>
-          <input className="fi" value={name} onChange={e => nameAutofill(e.target.value)}
-            placeholder="e.g. Rahul Shah"
-            list="namesDL"
-          />
-          <datalist id="namesDL">
-            {customers.filter(c => c.name.toLowerCase().includes(name.toLowerCase())).map(c =>
-              <option key={c.id} value={c.name}/>
-            )}
-          </datalist>
-        </div>
-        <div className="fg">
-          <label className="flbl">Mobile Number *</label>
-          <input className="fi" type="tel" value={phone} onChange={e => setPhone(e.target.value)} placeholder="+91 98765 43210"/>
-        </div>
-        <div className="fg">
-  <label className="flbl">Box *</label>
-
-  <select
-  className="fs"
-  value={boxId}
-  onChange={e => setBoxId(e.target.value)}
->
-  {boxes
-    .filter(box => box.active)
-    .map(box => (
-      <option
-        key={box.id}
-        value={box.id}
-      >
-        {box.name}
-      </option>
-    ))}
-</select>
+          <div className="fg">
+  <label className="flbl">Mobile Number *</label>
+  <input
+    className="fi"
+    type="tel"
+    value={phone}
+    onChange={e =>
+  phoneAutofill(e.target.value)
+}
+    maxLength={10}
+    inputMode="numeric"
+    placeholder="9876543210"
+  />
 </div>
+          <label className="flbl">Customer Name *</label>
+         <input
+  className="fi"
+  value={name}
+  onChange={e => setName(e.target.value)}
+  placeholder="e.g. Rahul Shah"
+  autoComplete="off"
+/>
+        </div>
+        
+        <div className="fg">
+  <label className="flbl">
+    Amount / Hour (₹) *
+  </label>
+
+  <input
+    className="fi"
+    type="number"
+    min="0"
+    value={rate}
+    onChange={e => setRate(e.target.value)}
+    placeholder="1500"
+  />
+</div>
+       {showBoxField && (
+  <div className="fg">
+    <label className="flbl">Box *</label>
+
+    <select
+      className="fs"
+      value={boxId}
+      onChange={e => setBoxId(e.target.value)}
+    >
+      {activeBoxes.map(box => (
+        <option
+          key={box.id}
+          value={box.id}
+        >
+          {box.name}
+        </option>
+      ))}
+    </select>
+  </div>
+)}
         <div className="fg">
           <label className="flbl">Date *</label>
           <input className="fi" type="date" value={date} onChange={e => setDate(e.target.value)}/>
@@ -446,16 +504,18 @@ console.log("NEW CUSTOMER ERROR:", newCustomerError)
           <label className="flbl">Status</label>
           <div className="fg">
 </div>
-          <select className="fs" value={status} onChange={e => setStatus(e.target.value)}>
-           <option value="confirmed">✅ Confirmed</option>
-           <option value="completed">🏆 Completed</option>
-           <option value="cancelled">❌ Cancelled</option>
-          </select>
+         <select
+  className="fs"
+  value={status}
+  onChange={e => setStatus(e.target.value)}
+>
+  <option value="confirmed">✅ Confirmed</option>
+</select>
         </div>
         <div className="fa">
-          <button className="btn btn-s" onClick={onClose}>Cancel</button>
+      
           <button className="btn btn-wa btn-sm" onClick={sendWA}>💬 WhatsApp</button>
-          <button className="btn btn-p" onClick={handleSave}>✅ Save</button>
+          <button className="btn btn-p" onClick={handleSave}>✅ Book</button>
         </div>
       </div>
     </div>
